@@ -1,0 +1,20 @@
+% Hubbard model Open boundaries on 6 qubits
+HH = pauliString.empty;
+HH(1, 1) = pauliString(o.PDH, [+3/4], {'IIIIII'});
+HH(1, 2) = pauliString(o.PDH, [-1/4], {'IZIIII'});
+HH(1, 3) = pauliString(o.PDH, [-1/4], {'ZIIIII'});
+HH(1, 4) = pauliString(o.PDH, [+1/4], {'ZZIIII'});
+HH(1, 5) = pauliString(o.PDH, [-1/4], {'IIIZII'});
+HH(1, 6) = pauliString(o.PDH, [-1/4], {'IIZIII'});
+HH(1, 7) = pauliString(o.PDH, [+1/4], {'IIZZII'});
+HH(1, 8) = pauliString(o.PDH, [-1/4], {'IIIIIZ'});
+HH(1, 9) = pauliString(o.PDH, [-1/4], {'IIIIZI'});
+HH(1, 10) = pauliString(o.PDH, [+1/4], {'IIIIZZ'});
+HH(1, 11) = pauliString(o.PDH, [-1/2], {'XZXIII'});
+HH(1, 12) = pauliString(o.PDH, [-1/2], {'YZYIII'});
+HH(1, 13) = pauliString(o.PDH, [-1/2], {'IXZXII'});
+HH(1, 14) = pauliString(o.PDH, [-1/2], {'IYZYII'});
+HH(1, 15) = pauliString(o.PDH, [-1/2], {'IIXZXI'});
+HH(1, 16) = pauliString(o.PDH, [-1/2], {'IIYZYI'});
+HH(1, 17) = pauliString(o.PDH, [-1/2], {'IIIXZX'});
+HH(1, 18) = pauliString(o.PDH, [-1/2], {'IIIYZY'});

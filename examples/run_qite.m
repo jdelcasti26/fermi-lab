@@ -1,4 +1,3 @@
-% run_qite.m
 % Sample script to run QITE
 clear;
 tic;

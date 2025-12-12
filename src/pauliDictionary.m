@@ -1,38 +1,7 @@
-% pauliDictionary.m
-% PAULIDICTIONARY  Pauli-string maps, measurement cache and initial states.
-%
-%   PDH = pauliDictionary(nqubits) creates a Pauli dictionary object for
-%   an nqubit system. The class:
-%
-%     • Stores one-qubit Pauli matrices I, X, Y, Z and some derived
-%       one-qubit operators (Hadamard, creation, annihilation, number).
-%     • Provides conversions between integer indices and Pauli strings,
-%       e.g. 1 ↔ 'III', 2 ↔ 'IIX', ...
-%     • Offers a Kronecker-product helper for building tensor-product
-%       operators from one-qubit factors.
-%     • Maintains a dictionary (DIC) of Pauli-string “maps” used to compute
-%       expectation values efficiently, without constructing full 2^n×2^n
-%       matrices.
-%     • Maintains a dictionary (DICOM) that caches measurement results
-%       (expectation values) of Pauli strings for a given state, together
-%       with flags indicating whether a given measurement is “fresh”.
-%     • Tracks separate measurement counters for different parts of the
-%       algorithm (linear system, container generation, analysis).
-%     • Provides convenience routines to build problem-specific initial
-%       states for predefined model families (prepare_initial_state).
-%
-%   Internally, nqubit Pauli strings (e.g. 'XXYY') are represented as
-%   compact labels, and their action on wavefunctions is encoded via maps
-%   with entries in {+1, -1, +1i, -1i}. This avoids explicit construction
-%   of dense Pauli matrices and enables fast expectation-value evaluation.
-%
-%   Example:
-%
-%     PDH = pauliDictionary(4);
-%     s   = PDH.numToString(2);      % returns 'IIX' for 4 qubits
-%     n   = PDH.stringToNum('IIX');  % returns 2
-%
-%   See also: qiteKernel, pauliString, hamiltonian, qite
+% Class to define the Pauli definitions: Pauli basis, dictionary and their associated methods:
+% - tensor product multiplication
+% - string to index translation ???
+% - index to string translation
 classdef pauliDictionary < handle
     properties
         nqbs        % Number of qubits
@@ -92,15 +61,7 @@ classdef pauliDictionary < handle
             o.measuresCO = 0;
             o.measuresAZ = 0;
         end
-        % NUMTOSTRING Convert integer index to Pauli string.
-        %
-        %   s = numToString(o, i) returns the Pauli string corresponding to
-        %   the index i, using a base-4 encoding over {I,X,Y,Z}. For
-        %   example, for nqbs = 3:
-        %     i = 1  → 'III'
-        %     i = 2  → 'IIX'
-        %     i = 3  → 'IIY'
-        %   and so on.
+        % Convert series index into string (e.g. 1 = 'III', 2 = 'IIX', 3 = 'IIY', ..., 5 = 'IXI' ...
         function s = numToString(o, i)
             % Calculate sequence number in base 4 (string format, st)
             st = dec2base(i - 1, 4);
@@ -126,11 +87,6 @@ classdef pauliDictionary < handle
                 end
             end
         end % end numToString
-        % STRINGTONUM Convert Pauli string to integer index.
-        %
-        %   n = stringToNum(o, s) returns the integer index corresponding
-        %   to the Pauli string s, using the same encoding as NUMTOSTRING.
-        %   Indexing is 1-based to match MATLAB conventions.        
         function n = stringToNum(o, s)
             % Return value allocation
             n = 0;
@@ -147,12 +103,9 @@ classdef pauliDictionary < handle
             % Array indexes in Matlab begin with 1!
             n = n + 1;  
         end
-        % KP  Kronecker product of a row cell array of matrices.
-        %
-        %   K = kp(o, MultsCell) returns the tensor product
-        %       MultsCell{1} ⊗ MultsCell{2} ⊗ ... ⊗ MultsCell{end}.
-        %
-        %   MultsCell must be a 1×N cell array of square matrices.
+        % function [kmatrix] = kp(MultiplicandsCell) returns the tensor
+        % product of matrices arg1 x arg2 x arg3 x arg4 ... defined
+        % in MultsCell
         function kmatrix = kp(o, MultsCell)
             szMc = size(MultsCell);
             if(szMc(1) > 1)
@@ -167,15 +120,6 @@ classdef pauliDictionary < handle
                 kmatrix = kron(MultsCell{i}, kmatrix);
             end
         end % end kp   
-        % RESETMEASURESLS Reset linear-system measurement counter to zero.
-        % RESETMEASURESCO Reset enrgy measurement counter.
-        % RESETMEASURESAZ Reset variational measurement counter.
-        %
-        % INCMEASURESLS / CO / AZ increment the respective counters.
-        %
-        % FLUSHMEASUREMENTS marks all cached measurements as "not fresh"
-        % in the DICOM dictionary, so they will be recomputed for the next
-        % updated state vector.        
         function o = resetMeasuresLS(o)
             o.measuresLS = 0;
         end
@@ -205,19 +149,8 @@ classdef pauliDictionary < handle
                 o.DICOM(K(i)) = stuini;
             end
         end
-        % PREPARE_INITIAL_STATE Build a model-specific initial state vector.
-        %
-        %   state = prepare_initial_state(o, modelFam) returns a normalized
-        %   state vector of length 2^nqbs corresponding to a predefined
-        %   initial state for the selected model family, e.g.:
-        %
-        %     • "H2"       with nqbs = 4
-        %     • "ISIOB04"  with nqbs = 4
-        %     • "ISIOB06", "ISYOB06", "HEYOB06" with nqbs = 6
-        %     • "HEYOB08", "H4CHAIN..." with nqbs = 8
-        %
-        %   If the requested (modelFam, nqbs) pair is unknown, an error is
-        %   raised. The returned state is always normalized.
+        % Convenience function with some sample initial states for a
+        % selected set of model families
         function state = prepare_initial_state(o, modelFam)
             state = zeros(o.twoN, 1);
             % Four-qubit models

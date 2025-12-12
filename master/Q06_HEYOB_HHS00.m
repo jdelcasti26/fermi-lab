@@ -1,0 +1,20 @@
+% Heisenberg model Open boundaries on 6 qubits
+HH = pauliString.empty;
+HH(1, 1) = pauliString(o.PDH, [1], {'IIIIXX'});
+HH(1, 2) = pauliString(o.PDH, [1], {'IIIXXI'});
+HH(1, 3) = pauliString(o.PDH, [1/2], {'IIXXII'});
+HH(1, 4) = pauliString(o.PDH, [1/2], {'IIXXII'});
+HH(1, 5) = pauliString(o.PDH, [1], {'IXXIII'});
+HH(1, 6) = pauliString(o.PDH, [1], {'XXIIII'});
+HH(1, 7) = pauliString(o.PDH, [1], {'IIIIYY'});
+HH(1, 8) = pauliString(o.PDH, [1], {'IIIYYI'});
+HH(1, 9) = pauliString(o.PDH, [1/2], {'IIYYII'});
+HH(1, 10) = pauliString(o.PDH, [1/2], {'IIYYII'});
+HH(1, 11) = pauliString(o.PDH, [1], {'IYYIII'});
+HH(1, 12) = pauliString(o.PDH, [1], {'YYIIII'});
+HH(1, 13) = pauliString(o.PDH, [1], {'IIIIZZ'});
+HH(1, 14) = pauliString(o.PDH, [1], {'IIIZZI'});
+HH(1, 15) = pauliString(o.PDH, [1/2], {'IIZZII'});
+HH(1, 16) = pauliString(o.PDH, [1/2], {'IIZZII'});
+HH(1, 17) = pauliString(o.PDH, [1], {'IZZIII'});
+HH(1, 18) = pauliString(o.PDH, [1], {'ZZIIII'});

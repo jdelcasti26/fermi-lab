@@ -1,0 +1,26 @@
+% Heisengberg symmetric model Open boundaries on 8 qubits
+HH = pauliString.empty;
+HH(1, 1) = pauliString(o.PDH, [1], {'IIIIIIXX'});
+HH(1, 2) = pauliString(o.PDH, [1], {'IIIIIXXI'});
+HH(1, 3) = pauliString(o.PDH, [1], {'IIIIXXII'});
+HH(1, 4) = pauliString(o.PDH, [1/2], {'IIIXXIII'});
+HH(1, 5) = pauliString(o.PDH, [1/2], {'IIIXXIII'});
+HH(1, 6) = pauliString(o.PDH, [1], {'IIXXIIII'});
+HH(1, 7) = pauliString(o.PDH, [1], {'IXXIIIII'});
+HH(1, 8) = pauliString(o.PDH, [1], {'XXIIIIII'});
+HH(1, 9) = pauliString(o.PDH, [1], {'IIIIIIYY'});
+HH(1, 10) = pauliString(o.PDH, [1], {'IIIIIYYI'});
+HH(1, 11) = pauliString(o.PDH, [1], {'IIIIYYII'});
+HH(1, 12) = pauliString(o.PDH, [1/2], {'IIIYYIII'});
+HH(1, 13) = pauliString(o.PDH, [1/2], {'IIIYYIII'});
+HH(1, 14) = pauliString(o.PDH, [1], {'IIYYIIII'});
+HH(1, 15) = pauliString(o.PDH, [1], {'IYYIIIII'});
+HH(1, 16) = pauliString(o.PDH, [1], {'YYIIIIII'});
+HH(1, 17) = pauliString(o.PDH, [1], {'IIIIIIZZ'});
+HH(1, 18) = pauliString(o.PDH, [1], {'IIIIIZZI'});
+HH(1, 19) = pauliString(o.PDH, [1], {'IIIIZZII'});
+HH(1, 20) = pauliString(o.PDH, [1/2], {'IIIZZIII'});
+HH(1, 21) = pauliString(o.PDH, [1/2], {'IIIZZIII'});
+HH(1, 22) = pauliString(o.PDH, [1], {'IIZZIIII'});
+HH(1, 23) = pauliString(o.PDH, [1], {'IZZIIIII'});
+HH(1, 24) = pauliString(o.PDH, [1], {'ZZIIIIII'});

@@ -1,36 +1,9 @@
-% pauliString.m
-%
-% pauliString
-% -----------
-% Class representing a (finite) linear combination of tensor-product
-% Pauli operators acting on an n-qubit Hilbert space.
-%
-% A typical object encodes expressions like:
-%
-%   0.5 * XXYYZZ  -  1.0 * XIIIIX  +  (1/3) * ZZZZZZ
-%
-% Internally, the representation is:
-%   - coef : complex column vector of coefficients (c_k)
-%   - pStr : cell array of Pauli strings (e.g. "XXYYZZ")
-%
-% A handle to a pauliDictionary instance (PH) provides:
-%   - Number of qubits (nqbs), dimension (twoN)
-%   - One-qubit Pauli matrices {I, X, Y, Z}
-%   - Precomputed "Pauli maps" for fast expectation values (PH.DIC)
-%   - Cached measurement results (PH.DICOM) and usage counters
-%
-% This class overloads the operators:
-%   +, -, *, times, ^, as well as custom algebraic operations:
-%   - commutator, anticommutator, dagger
-%
-% It also provides expectation-value methods:
-%   - eValLS : for linear-system assembly (QITE kernel)
-%   - eValCO : for coefficient-container generation
-%   - eValAZ : for analysis / multi-sweep operations
-%
-% NOTE:
-%   To build a "null" pauliString object one can use a zero-length
-%   coefficient array and a matching pStr (or handle this at a higher level).
+% pauliString : class defines two parallel arrays / cells to represent a Pauli string 
+% such as 0.5 * XXYYZZ - 1 * XIIIIX + (1/3) * ZZZZZZ
+% The first array stores the complex coefficients, the second (cell) the Pauli operators in string form.
+% There are two optional arrays to represent the same operators in numerical form (1 = I, 2 = X, 3 = Y, 4 = Z)
+% and in matrix form. An additional optional matrix stores the total sum(coef * op)
+% This class overrides methods '+', '*' and '^2'
 classdef pauliString
     properties
         % Handle to Pauli dictionary and status control
@@ -42,21 +15,8 @@ classdef pauliString
         pStr           % Pauli operator in string form (cell)
     end % end properties
     methods
-        % Class constructor.
-        %
-        % Usage:
-        %   o = pauliString(PH, coeffs, strings)
-        %
-        % where:
-        %   - PH      : handle to pauliDictionary
-        %   - coeffs  : (len x 1) complex column vector
-        %   - strings : (len x 1) cell array of Pauli strings, e.g. {"XXI", "IZZ", ...}
-        %
-        % The constructor:
-        %   - checks size consistency
-        %   - truncates strings to PH.nqbs
-        %   - validates only 'I', 'X', 'Y', 'Z' are used
-        %   - sorts terms and merges duplicates
+        % Class constructor. First argument is dictionary handle
+        % In order to build a null object type pauliString([0],'IIII');
         function o = pauliString(h, coeffs, strings)
             szCoef = size(coeffs);
             szPStr = size(strings);
@@ -81,11 +41,8 @@ classdef pauliString
             % Filter duplicates
             o = o.intnSort();
         end % end class constructor
-        % Internal sorting + duplicate merging.
-        %
-        % Sorts Pauli strings lexicographically and:
-        %   - merges duplicate strings by summing their coefficients
-        %   - removes terms with zero net coefficient
+        % Internal sorting of the Pauli string
+        % Function sorts charcter strings and sums coefficients if duplicates
         function o = intnSort(o)
             [tmpPStr, idx] = sort(o.pStr);
             tmpCoef = o.coef(idx);
@@ -107,15 +64,7 @@ classdef pauliString
             o.pStr = newPStr;
             o.coef = newCoef;
         end % end intnSort
-        % Internal multiplication of two Pauli strings (character-by-character),
-        % including the global phase (±1, ±1j) induced by the Pauli algebra.
-        %
-        % Inputs:
-        %   chs1, chs2 : character arrays of length PH.nqbs
-        %
-        % Output:
-        %   ph  : overall complex phase factor (1, -1, 1j, -1j)
-        %   chs : resulting Pauli string
+        % Internal multiplication of two character strings (with phases)
         function [ph, chs] = intnMult(o, chs1, chs2)
             % Initialize resulting string and phase
             chs = '';
@@ -151,13 +100,8 @@ classdef pauliString
                 end
             end
         end % end intMult
-        % Internal function to test commutation of two Pauli strings.
-        %
-        % Two strings commute iff the number of positions where both
-        % have non-identity and different Pauli operators is even.
-        %
-        % Returns:
-        %   iFlagComm = 1 if commute, 0 otherwise
+        % Internal function to check if two character (Pauli) strings commute
+        % They commute if non-coinciding characters different from I are even
         function iFlagComm = intnComm(o, chs1, chs2)
             counter = 0;
             for qb = 1 : o.PH.nqbs
@@ -173,9 +117,6 @@ classdef pauliString
         end % end intComm
         % function commStructure extracts commuting matrix of the component
         % strings of a Pauli string
-        %   Returns:
-        %     - S    : cell array with pairs of strings and commutation flag
-        %     - SMat : (len x len) symmetric matrix with 1 if commuting, 0 otherwise
         function [S, SMat] = commStructure(o)
             S = cell(0, 3);
             row = 0;
@@ -191,11 +132,8 @@ classdef pauliString
                 end
             end
         end
-        % --- Operator overloading ---
-
-        % Sum of two pauliString objects.
-        % Coefficients and strings are concatenated and passed through the
-        % constructor, which will merge duplicates and simplify.
+        % Overriding operators
+        % Sum of two Pauli strings
         function s = plus(obj1, obj2)
             totalPStr = [obj1.pStr; obj2.pStr];
             totalCoef = [obj1.coef; obj2.coef];
@@ -207,10 +145,7 @@ classdef pauliString
                 error("Unable to sum two empty pauliStrings");
             end
         end % end plus
-        % Overload * for:
-        %   - pauliString * scalar
-        %   - scalar * pauliString
-        %   - pauliString * pauliString (full product using intnMult)
+        % Multiplication of two Pauli strings
         function m = mtimes(obj1, obj2)
             % Allow numeric * object and object * numeric (scalar scaling).
             if(isa(obj1,'pauliString') && isnumeric(obj2))
@@ -251,7 +186,7 @@ classdef pauliString
                 error("INTERNAL ERROR: Unknown overload of * for pauñiString");
             end
         end % end mtimes
-        % Real part of a pauliString (keeps only real parts of coefficients).
+        % Real part of a Pauli String
         function obj2 = realPS(obj1)
             if(obj1.len == 0)
                 obj2 = obj1;
@@ -259,7 +194,7 @@ classdef pauliString
                 obj2 = pauliString(obj1.PH, real(obj1.coef), obj1.pStr);
             end
         end
-        % Imaginary part of a pauliString (i * imag(coeff)).
+        % Imaginary part of a Pauli String
         function obj2 = imagPS(obj1)
             if(obj1.len == 0)
                 obj2 = obj1;
@@ -267,22 +202,22 @@ classdef pauliString
                 obj2 = pauliString(obj1.PH, imag(obj1.coef) * 1j, obj1.pStr);
             end
         end
-        % Commutator [obj1, obj2] = obj1 * obj2 - obj2 * obj1
+        % Commutator of two Pauli strings
         function objC = commutator(obj1, obj2)
             objC = obj1 * obj2 - obj2 * obj1;
         end
-        % Anticommutator {obj1, obj2} = obj1 * obj2 + obj2 * obj1
+        % Anticommutator of two Pauli strings
         function objA = anticommutator(obj1, obj2)
             objA = obj1 * obj2 + obj2 * obj1;
         end
-        % Hermitian conjugate (dagger): conjugates the coefficients.
+        % Conjugate of a Pauli string
         function objD = dagger(obj1)
             objD = obj1;
             for i = 1 : objD.len
                 objD.coef(i) = obj1.coef(i)';
             end
         end
-        % Define square of a pauliString: only n = 2 is allowed.
+        % Define square of a Pauli string
         function sq = mpower(obj1, n)
             if(n ~= 2)
                 error("Only square powers are possible for pauliString objects");
@@ -291,15 +226,15 @@ classdef pauliString
             % checking the commuting or anticommuting Pauli strings
             sq = obj1 * obj1;
         end % end mpower
-        % Element-wise scalar multiplication: a .* obj1
+        % Multiply Pauli string by a scalar
         function t = times(a, obj1)
             t = pauliString(obj1.PH, a * obj1.coef, obj1.pStr);
         end % end times
-        % Subtraction: obj1 - obj2
+        % Substract two Pauli strings
         function m = minus(obj1, obj2)
             m = obj1 + (-1) .* obj2;
         end % end minus
-        % Custom display in console.
+        % Display pauliString in console
         function disp(o)
             [size_o_n, size_o_m] = size(o);
             if(size_o_n > 1 || size_o_m > 1)
@@ -327,7 +262,6 @@ classdef pauliString
                 end
             end
         end
-        % Utility: true if object is empty or has length 0.        
         function flag = isemptyorzero(obj1)
             if(isempty(obj1) || obj1.len == 0)
                 flag = true;
@@ -335,7 +269,7 @@ classdef pauliString
                 flag = false;
             end
         end
-        % String representation similar to disp(), but returns a string.
+        % Display pauliString in console
         function s = string(o)
             s = "";
             if(o.len == 0)
@@ -481,18 +415,6 @@ classdef pauliString
         end % end eValAZ        
         % Map calculation. WARNING the memory allocation below only admits
         % up to 15 qubits maximum
-        % --- Map generation and matrix representations ---
-
-        % calcMap:
-        %   For all Pauli strings in this object, if a map is not yet present
-        %   in PH.DIC, construct it and store it.
-        %
-        %   Each map is stored as:
-        %     stu.Idx : uint16 indices of the non-zero column per row
-        %     stu.TR  : int8 real part  (±1 or 0)
-        %     stu.TI  : int8 imag part  (±1 or 0)
-        %
-        %   Also initializes PH.DICOM entries (fresh = false, value = 0).        
         function o = calcMap(o)
             % Allocate space for index and coefficients T
             % Allocate structure for Pauli operator defintion

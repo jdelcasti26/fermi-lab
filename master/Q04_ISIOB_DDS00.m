@@ -1,0 +1,9 @@
+% Ising model Open boundaries on 4 qubits / Domain = 3
+DD = pauliString.empty;
+DD(1, 1) = pauliString(o.PDH, [-1j], {'IXXX'});
+DD(1, 2) = pauliString(o.PDH, [-1j], {'IXXX'});
+DD(1, 3) = pauliString(o.PDH, [-1j], {'XXXI'});
+DD(1, 4) = pauliString(o.PDH, [-1j], {'XXXI'});
+DD(1, 5) = pauliString(o.PDH, [-1j], {'IXXX'});
+DD(1, 6) = pauliString(o.PDH, [-1j], {'IXXX'});
+DD(1, 7) = pauliString(o.PDH, [-1j], {'XXXI'});
