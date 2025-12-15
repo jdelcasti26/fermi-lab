@@ -5,6 +5,12 @@ noQubits = 8;
 modelFam = "H4CHAIN";
 partition1P = {[1:110]};
 permutation1P = [1];
+% Partitions are selected with bespoke code whose results are hardcoded
+% here. The procedure is the following: calculate the commutator structure
+% of ansatz operator terms agains hamiltonian terms in matrix form 
+% (1 commute / 0 do not commute). Reorder rows and colums to make the 
+% matrix as block diagonal as possible (e.g. using k-means).
+% Partition according to lists of reordered ansatz terms. 
 partition2P = {[3,4,7,8,10,12,13,14,17,26,29,35,38,41,45,47,50,54,58,59,60,61,66,68,69,71,74,...
                75,76,77,79,85,87,90,92,95,97,98,101,102,103,106,109],...
               [1,2,5,6,9,11,15,16,18,19,20,21,22,23,24,25,27,28,30,31,32,33,34,36,37,39,40,42,43,44,46,48,...

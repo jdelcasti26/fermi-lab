@@ -1,3 +1,9 @@
+% hamiltonian.m
+%
+%  Author: J. Del Castillo
+%  Project: MT-QITE / fermi-lab
+%  For theoretical details, see: arXiv:2512.10875
+%
 % Class definition hamiltonian : Hardcoded Hamiltonian models and parameters in
 % master directory are processed according to user's choice. Class constructor
 % permits to subgroup Hamiltonian terms according to row vectors with
@@ -6,19 +12,53 @@
 % An ansatz is provided in files _AZF??.m or _AZS??.m. For fermionic
 % hamiltonians ansätze are typically a list of antihermitian single or
 % double excitations and de-excitations. For spin hamiltonians, ansätze are typically 
-% a list of antihermitian Pauli strings (e.g. -i * XXI, -i * XXZ etc.
+% a list of antihermitian Pauli strings (e.g. -i * XXI, -i * XXZ etc.).
+%
 % The class manages hamiltonian construction in the desired partition
 % along with a specific ansatz per partition term. This is defined in
-% domain files _DDF??.m or _DDS??.m
+% domain files _DDF??.m or _DDS??.m.
+%
 % For fermionic hamiltonians, the ansatz is specified by a list of ansatz
 % operator numbers (as defined in ansatz file) per hamiltonian term (as
-% defined in the hamiltonian file)
+% defined in the hamiltonian file).
+%
 % For spin hamiltonians a string mask per hamiltonian term such as 'IIXXII' is passed in the
 % domain file, and then strings corresponding to that mask in the ansatz
 % file are selected. X stands for any Pauli string, whereas I forces
-% strings matching exactly the same Is
-% Domains are encoded as follows: ? means that the qubit is relevant, I that it is excluded
-% Class manages the exact eigenvalue / eigenvector calculation for reference
+% strings matching exactly the same Is.
+%
+% Domains are encoded as follows: ? means that the qubit is relevant, I that it is excluded.
+%
+% Class manages the exact eigenvalue / eigenvector calculation for reference.
+%
+% Main responsibilities
+% - Load model configuration from params/cfg.json and dispatch to "master" definition files:
+%     * Hamiltonian terms: _HHF??.m (fermions) or _HHS??.m (spins)  -> variable HH
+%     * Ansatz operators : _AZF??.m (fermions) or _AZS??.m (spins)  -> variable AZ
+%     * Optional parameters: _PP??.m                               -> variable PP
+%     * Optional domains   : _DDF??.m (fermions) or _DDS??.m (spins)-> variable DD
+% - Validate input definitions:
+%     * HH terms must be Hermitian
+%     * AZ terms must be anti-Hermitian
+% - Build a partitioned Hamiltonian:
+%     * Inputs via varargin specify regrouping of HH terms into M partition blocks
+%     * For each block m, build H(m) as the sum of the specified HH terms
+%     * Build HT = sum_m H(m) as the full Hamiltonian
+% - Build an ansatz per partition term (cellAZ{m}) according to domain rules:
+%     * If no domains are provided: replicate full AZ for each partition term
+%     * Fermions: DD provides lists of AZ indices per HH term; merged per partition term
+%     * Spins: DD provides masks; select AZ strings whose 'I' positions match the mask
+%
+% Exact diagonalization helpers (reference / validation)
+% - exact_eigenvalues()  : all eigenvalues of HT
+% - exact_eigenvalue()   : minimum eigenvalue of HT
+% - exact_eigenvectors() : eigenvector(s) associated with the minimum eigenvalue, including
+%                          possible degeneracy within tolerance EPSEIG
+%
+% Notes
+% - This class is a foundational dependency for qiteKernel (and higher-level drivers qite, mtqite).
+% - PDH (pauliDictionary handle) provides dimensionality (twoN) and supports Pauli-string mapping.
+%
 classdef hamiltonian < handle
     properties
         EPSEIG = 1.0e-12; % Tolerance to consider that two numerically close eigenvalues are degenerate
