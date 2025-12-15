@@ -1,3 +1,54 @@
+%--------------------------------------------------------------------------
+% qite.m
+%
+%  Author: J. Del Castillo
+%  Project: MT-QITE / fermi-lab
+%  For theoretical details, see: arXiv:2512.10875
+%
+% Classical implementation of the Quantum Imaginary Time Evolution (QITE)
+% algorithm using a Trotterized real-time evolution (RTE) ansatz.
+%
+% This class implements the standard QITE workflow for a fixed Hamiltonian
+% partition, scanning over imaginary-time step sizes and Trotter steps.
+% At each step, a linear system is constructed and solved in order to
+% determine the parameters of a Pauli-operator ansatz that approximates
+% imaginary-time evolution.
+%
+% The algorithm proceeds as follows:
+%   1) Initialize the statevector |ψ₀⟩.
+%   2) For each imaginary-time step Δτ and Trotter step:
+%        - Measure the observables required to construct the QITE
+%          linear system for each Hamiltonian partition term.
+%        - Solve the linear system to obtain ansatz parameters.
+%        - Apply the resulting RTE circuit to evolve the state.
+%   3) Reconstruct full circuits a posteriori to:
+%        - Estimate energies ⟨ψ|H|ψ⟩,
+%        - Compute fidelities with respect to exact eigenstates,
+%        - Evaluate circuit depth and measurement cost.
+%
+% All low-level operations (measurement bookkeeping, Hamiltonian handling,
+% state evolution, exact diagonalization) are delegated to the qite_kernel
+% class. This class acts as a high-level algorithmic driver and data
+% container for QITE simulations.
+%
+% Main outputs:
+%   - cellQiteOps   : Pauli-operator ansatz per time, Trotter step and term
+%   - cellThetas   : Corresponding variational parameters
+%   - arrayE       : Energy estimates per time and Trotter step
+%   - arrOpCount   : Operator count (circuit depth proxy)
+%   - arrPSCount   : Pauli-string count (nonlocality proxy)
+%   - measureCountLS / measureCountEE : Measurement cost tracking
+%
+% Typical usage:
+%   q = qite(QK, psi0, timeSeries, noTS);
+%   [q, summary, finalState] = q.estimate_energy();
+%
+% This implementation is intended for:
+%   - Algorithmic prototyping and scaling studies,
+%   - Measurement-cost analysis,
+%   - Benchmarking against exact imaginary-time evolution.
+%
+%--------------------------------------------------------------------------
 classdef qite
     properties
         % Runtime configuration

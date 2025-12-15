@@ -1,21 +1,111 @@
-% Class definition qite_kernel : kernel calculation of the QITE algorithm
-% Class encapsulates the core calculations upon which the QITE algorithm is based
-% Class inherits hamiltonian, so it too is a handle class
-% Calculations are based on a stateVector on which operators are measured
-% This stateVector can be updated externally with method set_statevector
-% Measurements are handled as follows: when method measureState is invoked
-% a structure stuMeasured is generated (see below) with coeficients, column
-% vectors and matrix necessary to generate QITE's linear system when the time step size Dt
-% is informed through method independent_term()
-% stuMeasured can be reused to calculate different linear systems for
-% different Dt's if stateVector has not been updated. Reusing measurements
-% is managed through twin struct stuReuse
-% solve_linear_system() solves the (in principle rank-defficent) linear
-% system of equations with either the Moore-Penrose pseudoinverse algorithm
-% or custom custom_pinv() which minimizes the number of non-zero solutions
-% evolve_state() generates the necessary QITE unitary to transform
-% stateVector into the next reference state, in principle closer to the
-% ground state.
+%==========================================================================
+% qiteKernel.m
+%
+%  Author: J. Del Castillo
+%  Project: MT-QITE / fermi-lab
+%  For theoretical details, see: arXiv:2512.10875
+%
+%==========================================================================
+% Project   : QITE — Quantum Imaginary Time Evolution
+% Class     : qiteKernel
+% Author    : [Your Name]
+% Reference : [Optional arXiv link]
+%
+% Description
+% -----------
+% Core kernel class implementing the measurement-based Quantum Imaginary
+% Time Evolution (QITE) algorithm.
+%
+% This class encapsulates all low-level numerical and algebraic operations
+% required by QITE, independently of higher-level control logic (time scans,
+% Trotterization strategies, symmetry handling, etc.), which are implemented
+% in wrapper classes such as qite, mtqite, etc.
+%
+% It is the common QITE kernel calculations for a number of QITE-based
+% algorithms, like pure QITE, MT-QITE, ACQITE and sm-QITE
+%
+% The kernel operates on a reference quantum state |ψ⟩ and computes the
+% measurement data required to build and solve the QITE linear system
+%
+%     SST · θ = b
+%
+% for a given Hamiltonian term, ansatz, and imaginary-time step Δt.
+%
+% Design Principles
+% -----------------
+% • Handle class inheriting from `hamiltonian`, ensuring shared hamiltonian partition
+%  ansätze and efficient reuse across algorithmic layers.
+% • Measurement-driven formulation: all quantities entering the linear
+%   system are obtained from expectation values on the current stateVector.
+% • Explicit separation between:
+%     - measurement generation,
+%     - linear-system construction,
+%     - linear-system solution,
+%     - state evolution.
+%
+% State Management
+% ----------------
+% The kernel maintains an internal reference `stateVector`, which:
+% • is set or updated externally via `set_statevector()`,
+% • serves as the state on which all QITE measurements are performed,
+% • must remain unchanged if measurement reuse is intended.
+%
+% Measurement Handling and Reuse
+% ------------------------------
+% When `measure_state(mterm)` is invoked, a structure `measured(mterm)` is
+% populated with all coefficients required to build the linear system:
+%
+%   measured(mterm).c1, c2   : normalization coefficients
+%   measured(mterm).Mb1, Mb2 : independent vectors
+%   measured(mterm).SST      : symmetric coefficient matrix
+%
+% These measurements are independent of Δt and may therefore be reused to
+% solve multiple linear systems for different imaginary-time step sizes,
+% provided the reference stateVector has not been updated.
+%
+% Measurement reuse is explicitly supported via the `reuse` structure and is
+% exploited by higher-level algorithms (e.g. qite, mtqite) to reduce the
+% total measurement cost.
+%
+% Linear System Solution
+% ----------------------
+% The linear system is solved by `solve_linear_system()` using either:
+% • the Moore–Penrose pseudoinverse (pinv), or
+% • a custom QR-based solver (`custom_pinv`) designed to minimize the number
+%   of non-zero coefficients, thereby reducing circuit depth.
+%
+% A numerical tolerance EPSLS is used to identify and discard negligible
+% coefficients.
+%
+% State Evolution
+% ---------------
+% The method `evolve_state()` constructs the QITE unitary
+%
+%     U(Δt) = ∏_i exp(-Δt · θ_i · P_i)
+%
+% from the non-zero solution coefficients and applies it to the current
+% reference state, producing the evolved state |ψ'⟩.
+%
+% Supported QITE Orders
+% ---------------------
+% The kernel supports:
+% • First-order QITE ("1st")
+% • Second-order QITE ("2nd")
+% • First-order with zero-order normalization ("1st0")
+%
+% Measurement operators for each order are precomputed at construction time.
+%
+% Intended Usage
+% --------------
+% This class is not meant to be used directly by the end user. It is the
+% computational backbone of higher-level QITE workflows, which manage:
+% • time-step scans,
+% • Trotter steps,
+% • Hamiltonian term ordering,
+% • symmetry exploitation,
+% • energy estimation and benchmarking.
+%
+%==========================================================================
 classdef qiteKernel < hamiltonian
     properties
         % Inherited

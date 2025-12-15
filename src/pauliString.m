@@ -1,9 +1,41 @@
-% pauliString : class defines two parallel arrays / cells to represent a Pauli string 
-% such as 0.5 * XXYYZZ - 1 * XIIIIX + (1/3) * ZZZZZZ
-% The first array stores the complex coefficients, the second (cell) the Pauli operators in string form.
-% There are two optional arrays to represent the same operators in numerical form (1 = I, 2 = X, 3 = Y, 4 = Z)
-% and in matrix form. An additional optional matrix stores the total sum(coef * op)
-% This class overrides methods '+', '*' and '^2'
+% pauliString.m
+%
+% Author: J. Del Castillo
+% Project: MT-QITE / fermi-lab
+% For theoretical details, see: arXiv:2512.10875
+%
+% pauliString
+% -----------
+% Class representing a (finite) linear combination of tensor-product
+% Pauli operators acting on an n-qubit Hilbert space.
+%
+% A typical object encodes expressions like:
+%
+%   0.5 * XXYYZZ  -  1.0 * XIIIIX  +  (1/3) * ZZZZZZ
+%
+% Internally, the representation is:
+%   - coef : complex column vector of coefficients (c_k)
+%   - pStr : cell array of Pauli strings (e.g. "XXYYZZ")
+%
+% A handle to a pauliDictionary instance (PH) provides:
+%   - Number of qubits (nqbs), dimension (twoN)
+%   - One-qubit Pauli matrices {I, X, Y, Z}
+%   - Precomputed "Pauli maps" for fast expectation values (PH.DIC)
+%   - Cached measurement results (PH.DICOM) and usage counters
+%
+% This class overloads the operators:
+%   +, -, *, times, ^, as well as custom algebraic operations:
+%   - commutator, anticommutator, dagger
+%
+% It also provides expectation-value methods (same calculation, different
+% counters)
+%   - eValLS : for linear-system assembly (QITE kernel)
+%   - eValCO : for energy estimation
+%   - eValAZ : for variational searches
+%
+% NOTE:
+%   To build a "null" pauliString object one can use a zero-length
+%   coefficient array and a matching pStr (or handle this at a higher level).
 classdef pauliString
     properties
         % Handle to Pauli dictionary and status control

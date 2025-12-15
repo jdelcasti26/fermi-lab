@@ -1,5 +1,45 @@
-% Custom class to store Pauli strings resulting from {ansatz(I), ansatz(J)}
-% Resulting array is only informed for the upper diagonal elements (j >= i)
+%==========================================================================
+% opsCoefficient.m
+%
+%  Author: J. Del Castillo
+%  Project: MT-QITE / fermi-lab
+%  For theoretical details, see: arXiv:2512.10875
+%
+%
+% Purpose
+% -------
+% This class constructs and stores the operators entering the
+% QITE linear system, obtained from pairwise combinations of ansatz operators.
+% For a given ansatz term {t_I}, it evaluates the real Pauli-string contributions
+% resulting from the (anti)commutator structure required by imaginary-time
+% evolution:
+%
+%     C_{IJ} ~ Re{ - {t_I, t_J} }
+%
+% Only the upper-triangular part (J >= I) is computed and stored, exploiting
+% the symmetry of the resulting coefficient matrix.
+%
+% Each matrix element corresponds to a Pauli string array (or empty string) that
+% contributes to the linear system defining the QITE update directions.
+%
+% Design notes
+% ------------
+% • The resulting Pauli strings are stored in a 2D cell array `cellPS`,
+%   indexed as (i, j) with j >= i.
+% • Complex (purely imaginary) contributions are discarded by construction,
+%   as only real-valued operators enter the QITE linear system.
+% • Each resulting Pauli string is immediately mapped to its internal
+%   dictionary representation via `calcMap()` for efficient reuse.
+% • This class is typically instantiated once per ansatz update and reused
+%   during linear-system assembly inside qite_kernel.
+%
+% Intended usage
+% --------------
+% This class is a low-level building block used internally by qite_kernel
+% to assemble the operator overlap matrix appearing in the QITE linear system.
+% It is not intended to be used directly by high-level drivers.
+%
+%==========================================================================
 classdef opsCoefficient
     properties
         PDH

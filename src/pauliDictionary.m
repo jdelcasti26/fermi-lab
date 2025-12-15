@@ -1,7 +1,42 @@
-% Class to define the Pauli definitions: Pauli basis, dictionary and their associated methods:
-% - tensor product multiplication
-% - string to index translation ???
-% - index to string translation
+% pauliDictionary.m
+% PAULIDICTIONARY  Pauli-string maps, measurement cache and initial states.
+%
+%  Author: J. Del Castillo
+%  Project: MT-QITE / fermi-lab
+%  For theoretical details, see: arXiv:2512.10875
+%
+%   PDH = pauliDictionary(nqubits) creates a Pauli dictionary object for
+%   an nqubit system. The class:
+%
+%     • Stores one-qubit Pauli matrices I, X, Y, Z and some derived
+%       one-qubit operators (Hadamard, creation, annihilation, number).
+%     • Provides conversions between integer indices and Pauli strings,
+%       e.g. 1 ↔ 'III', 2 ↔ 'IIX', ...
+%     • Offers a Kronecker-product helper for building tensor-product
+%       operators from one-qubit factors.
+%     • Maintains a dictionary (DIC) of Pauli-string “maps” used to compute
+%       expectation values efficiently, without constructing full 2^n×2^n
+%       matrices.
+%     • Maintains a dictionary (DICOM) that caches measurement results
+%       (expectation values) of Pauli strings for a given state, together
+%       with flags indicating whether a given measurement is “fresh”.
+%     • Tracks separate measurement counters for different parts of the
+%       algorithm (linear system, container generation, analysis).
+%     • Provides convenience routines to build problem-specific initial
+%       states for predefined model families (prepare_initial_state).
+%
+%   Internally, nqubit Pauli strings (e.g. 'XXYY') are represented as
+%   compact labels, and their action on wavefunctions is encoded via maps
+%   with entries in {+1, -1, +1i, -1i}. This avoids explicit construction
+%   of dense Pauli matrices and enables fast expectation-value evaluation.
+%
+%   Example:
+%
+%     PDH = pauliDictionary(4);
+%     s   = PDH.numToString(2);      % returns 'IIX' for 4 qubits
+%     n   = PDH.stringToNum('IIX');  % returns 2
+%
+%   See also: qiteKernel, pauliString, hamiltonian, qite
 classdef pauliDictionary < handle
     properties
         nqbs        % Number of qubits
