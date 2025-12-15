@@ -1,6 +1,12 @@
-# QITE: Classical Emulation of Quantum Imaginary-Time Evolution
+# MT-QITE: Classical Emulation of Multiple-Time Quantum Imaginary-Time Evolution
 
-This repository implements a **high-performance, noiseless classical simulation** of the **Quantum Imaginary-Time Evolution (QITE)** algorithm and several related variants.  
+For a detailed theoretical introduction and examples see:
+
+ J. Del Castillo, M. Granath, E. van Nieuwenburg<br>
+ Multiple-Time Quantum Imaginary Time Evolution arXiv:2512.10875 [quant-ph]<br>
+ https://arxiv.org/abs/2512.10875<br>
+
+This repository implements a **high-performance, noiseless classical simulation** of the **Multiple-Time Quantum Imaginary-Time Evolution (MT-QITE)** algorithm, based on the QITE algorithm, and several related variants.  
 It is built entirely in MATLAB and designed for **research-grade experimentation**, focusing on:
 
 - Efficient symbolic Pauli-string algebra  

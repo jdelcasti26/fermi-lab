@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+title: "MT-QITE: Multiple-Time Quantum Imaginary Time Evolution (MATLAB)"
+message: "If you use this code in academic work, please cite the associated arXiv paper."
+type: software
+
+authors:
+  - given-names: Julio
+    family-names: Del Castillo
+
+repository-code: "https://github.com/jdelcasti26/fermi-lab"
+
+keywords:
+  - quantum computing
+  - quantum simulation
+  - imaginary time evolution
+  - QITE
+  - MT-QITE
+  - electronic structure
+  - variational algorithms
+
+license: MIT
+
+preferred-citation:
+  type: article
+  title: "Multiple-Time Quantum Imaginary Time Evolution"
+  authors:
+    - given-names: Julio
+      family-names: Del Castillo
+    - given-names: Mats
+      family-names: Granath
+    - given-names: Evert
+      family-names: van Nieuwenburg
+  journal: "arXiv"
+  year: 2025
+  identifier: "arXiv:2512.10875"
