@@ -240,7 +240,18 @@ You can validate correctness by checking:
 
 # 📜 License
 
-MIT License (or specify your own)
+MIT License
+
+---
+
+## Citation
+
+If you use this code in academic work, please cite the associated paper:
+
+> Julio Del Castillo, Mats Granath, Evert van Nieuwenburg,  
+> **Multiple-Time Quantum Imaginary Time Evolution**,  
+> *arXiv preprint* (2025).  
+> https://arxiv.org/abs/2512.10875
 
 ---
 
@@ -253,4 +264,14 @@ This project draws inspiration from:
 - Quantum chemistry ansatz structures  
 
 And was developed with careful focus on **performance**, **correctness**, and **readability**.
+
+### BibTeX
+```bibtex
+@article{Del_Castillo_Multiple-Time_Quantum_Imaginary_2025,
+author = {Del Castillo, Julio and Granath, Mats and van Nieuwenburg, Evert},
+journal = {arXiv},
+title = {{Multiple-Time Quantum Imaginary Time Evolution}},
+url = {https://arxiv.org/abs/2512.10875},
+year = {2025}
+}
 
