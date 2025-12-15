@@ -9,22 +9,14 @@ The numerical data and figures presented in the manuscript can be reproduced usi
 
 ## Directory Structure
 
-To reproduce the results, place all available source files in a common root directory with the following structure:
+To reproduce the results, place all available source files under /src and /examples in a common root directory with the following structure:
 
-/src  
-/examples  
 /params  
 /master  
 /initials  
 /results  
 
 The role of each directory is as follows:
-
-- **/src**  
-  Core MATLAB source files implementing the QITE and MT-QITE algorithms.
-
-- **/examples**  
-  Driver scripts (`reported_XXXX.m`) corresponding to specific figures or datasets reported in the manuscript.
 
 - **/params**  
   Configuration files (JSON and auxiliary `.m` files) defining model parameters and runtime options.
