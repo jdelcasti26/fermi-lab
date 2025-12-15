@@ -31,5 +31,9 @@ preferred-citation:
     - given-names: Evert
       family-names: van Nieuwenburg
   journal: "arXiv"
+  url: "https://arxiv.org/abs/2512.10875"
   year: 2025
-  identifier: "arXiv:2512.10875"
+  identifiers:
+    - type: arxiv
+      value: "2512.10875"
+
